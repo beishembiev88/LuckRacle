@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Luckyra – Number Reveal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Google Font (close to Satoshi) -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0b0d26;
+      --bg-deep: #040816;
+      --gold-light: #f7be27;
+      --gold-dark: #d9981f;
+      --gold-deeper: #8a580f;
+      --red-ball: #d92827;
+      --white: #ffffff;
+      --text-muted: #c7cbd4;
+      --button-blue: #15306b;
+      --button-blue-hover: #1e3f8e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at top, #182258 0, var(--bg-deep) 55%, #000 100%);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 480px;
+      padding: 24px 20px 32px;
+    }
+
+    .card {
+      background: radial-gradient(circle at top, #141c4b 0, var(--bg) 55%, var(--bg-deep) 100%);
+      border-radius: 24px;
+      padding: 24px 20px 28px;
+      box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.7),
+        0 0 40px rgba(18, 53, 138, 0.7);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* faint particles / stars */
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(247, 190, 39, 0.2) 0, transparent 40%),
+        radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.18) 0, transparent 55%),
+        radial-gradient(circle at 50% 80%, rgba(247, 190, 39, 0.1) 0, transparent 55%);
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .card-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .logo-ball {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 20%, #fff 0, #ffd976 20%, var(--gold-light) 45%, var(--gold-dark) 70%, var(--gold-deeper) 100%);
+      box-shadow: 0 0 18px rgba(247, 190, 39, 0.8);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: #13204b;
+      letter-spacing: 0.02em;
+    }
+
+    .logo-ball::after {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border-radius: inherit;
+      background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.95), transparent 55%);
+      opacity: 0.9;
+    }
+
+    .logo-ball span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-text {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      text-shadow: 0 0 14px rgba(247, 190, 39, 0.9);
+    }
+
+    .subtitle {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* Pre-reveal */
+    .pre-reveal {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 32px 0 24px;
+    }
+
+    .pre-text {
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .spinner {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 4px solid rgba(247, 190, 39, 0.2);
+      border-top-color: var(--gold-light);
+      animation: spin 1s linear infinite;
+      position: relative;
+    }
+
+    .spinner::after {
+      content: "";
+      position: absolute;
+      inset: 6px;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.18);
+      border-right-color: rgba(255, 255, 255, 0.9);
+      animation: spin 1.4s linear infinite reverse;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Reveal section */
+    .reveal-section {
+      display: none;
+      animation: fadeIn 0.55s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .lotto-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 10px;
+      margin: 24px 0 12px;
+      min-height: 90px;
+    }
+
+    .ball {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #13204b;
+      position: relative;
+      transform: translateY(-120px);
+      opacity: 0;
+    }
+
+    .ball.gold {
+      background: radial-gradient(circle at 30% 20%, #fff 0, #ffe89b 15%, #ffd55b 35%, var(--gold-light) 55%, var(--gold-dark) 80%, var(--gold-deeper) 100%);
+      box-shadow:
+        0 0 18px rgba(247, 190, 39, 0.9),
+        0 8px 18px rgba(0, 0, 0, 0.7);
+    }
+
+    .ball.red {
+      background: radial-gradient(circle at 30% 20%, #fff 0, #ff9d9d 18%, #ff5050 40%, var(--red-ball) 70%, #7b1010 100%);
+      box-shadow:
+        0 0 18px rgba(255, 108, 108, 0.9),
+        0 8px 18px rgba(0, 0, 0, 0.7);
+    }
+
+    .ball::before {
+      content: "";
+      position: absolute;
+      inset: 5px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.9) 0, transparent 60%);
+      opacity: 0.9;
+    }
+
+    .ball span {
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 1px 1px rgba(255,255,255,0.7);
+    }
+
+    .ball.drop-in {
+      animation: dropIn 0.7s cubic-bezier(.21,1.01,.35,1) forwards;
+    }
+
+    @keyframes dropIn {
+      0% {
+        transform: translateY(-120px) scale(0.9);
+        opacity: 0;
+      }
+      70% {
+        transform: translateY(8px) scale(1.04);
+        opacity: 1;
+      }
+      90% {
+        transform: translateY(-4px) scale(0.98);
+      }
+      100% {
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .label {
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    .sub-label {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .motivation {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--gold-light);
+      margin-bottom: 18px;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .btn {
+      border-radius: 999px;
+      padding: 11px 18px;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background-image: linear-gradient(135deg, var(--gold-light), var(--gold-dark));
+      color: #13204b;
+      box-shadow:
+        0 0 18px rgba(247, 190, 39, 0.9),
+        0 10px 22px rgba(0, 0, 0, 0.8);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        0 0 22px rgba(247, 190, 39, 1),
+        0 14px 26px rgba(0, 0, 0, 0.9);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, var(--button-blue), #284491);
+      color: #f4f5ff;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.7);
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-1px);
+      background: linear-gradient(135deg, var(--button-blue-hover), #3255b5);
+    }
+
+    .share-card {
+      border-radius: 16px;
+      border: 1px solid rgba(199, 203, 212, 0.35);
+      padding: 10px 12px;
+      background: radial-gradient(circle at top, rgba(247,190,39,0.12), rgba(11,13,38,0.9));
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .share-text {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .timestamp {
+      font-size: 0.7rem;
+      color: rgba(199, 203, 212, 0.8);
+      margin-top: 4px;
+    }
+
+    .share-btn {
+      font-size: 0.8rem;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(247, 190, 39, 0.7);
+      color: var(--gold-light);
+      background: transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+    }
+
+    .share-btn:hover {
+      background: rgba(247, 190, 39, 0.16);
+      transform: translateY(-1px);
+    }
+
+    @media (min-width: 520px) {
+      .page {
+        max-width: 520px;
+      }
+      .lotto-row {
+        gap: 12px;
+      }
+      .ball {
+        width: 62px;
+        height: 62px;
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div class="card">
+    <div class="card-inner">
+      <!-- HEADER / LOGO -->
+      <header class="logo-row">
+        <div class="logo-ball"><span>L</span></div>
+        <div class="logo-text">LUCKYRA</div>
+      </header>
+
+      <p class="subtitle">Your personalized ritual for jackpot numbers.</p>
+
+      <!-- PRE-REVEAL STATE -->
+      <section id="preReveal" class="pre-reveal">
+        <p class="pre-text">Manifesting your lucky numbers…</p>
+        <div class="spinner"></div>
+      </section>
+
+      <!-- REVEAL STATE -->
+      <section id="revealSection" class="reveal-section">
+        <p class="label" id="lotteryTypeLabel">Your Luckyra Numbers for Mega Millions</p>
+        <p class="sub-label">Crafted from your birthday, zodiac and jackpot energy.</p>
+
+        <div class="lotto-row" id="ballRow">
+          <!-- Balls will be injected here -->
+        </div>
+
+        <p id="motivationText" class="motivation"></p>
+
+        <div class="cta-row">
+          <button class="btn btn-primary" id="plusButton">
+            Generate 5 More Sets – Try Luckyra Plus
+          </button>
+          <button class="btn btn-secondary" id="ticketButton">
+            Buy My Ticket Now →
+          </button>
+        </div>
+
+        <div class="share-card">
+          <div>
+            <div class="share-text">Screenshot this card and keep it with your ticket.</div>
+            <div class="timestamp" id="timestamp"></div>
+          </div>
+          <button class="share-btn" id="shareButton">Copy Numbers</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+  // CONFIG: Mega Millions by default
+  const CONFIG = {
+    lotteryName: "Mega Millions",
+    mainBalls: 5,
+    mainMin: 1,
+    mainMax: 70,
+    megaMin: 1,
+    megaMax: 25
+  };
+
+  const preRevealEl   = document.getElementById("preReveal");
+  const revealSection = document.getElementById("revealSection");
+  const ballRow       = document.getElementById("ballRow");
+  const motivationEl  = document.getElementById("motivationText");
+  const timestampEl   = document.getElementById("timestamp");
+  const lotteryLabel  = document.getElementById("lotteryTypeLabel");
+  const plusBtn       = document.getElementById("plusButton");
+  const ticketBtn     = document.getElementById("ticketButton");
+  const shareBtn      = document.getElementById("shareButton");
+
+  const motivationLines = [
+    "This set is running hot tonight 🔥",
+    "Strong numerology alignment on this draw.",
+    "High jackpot energy around your birth numbers.",
+    "Stars and stats agree — these are spicy.",
+    "Keep this combo close. It feels loaded."
+  ];
+
+  function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function generateUniqueNumbers(count, min, max) {
+    const set = new Set();
+    while (set.size < count) {
+      set.add(randomInt(min, max));
+    }
+    return Array.from(set).sort((a, b) => a - b);
+  }
+
+  function generateNumbers() {
+    // Main balls
+    const mains = generateUniqueNumbers(
+      CONFIG.mainBalls,
+      CONFIG.mainMin,
+      CONFIG.mainMax
+    );
+    // Mega / Power ball
+    const mega = randomInt(CONFIG.megaMin, CONFIG.megaMax);
+
+    return { mains, mega };
+  }
+
+  function renderBalls(numbers) {
+    ballRow.innerHTML = "";
+
+    // Gold balls
+    numbers.mains.forEach((num, index) => {
+      const ball = document.createElement("div");
+      ball.className = "ball gold";
+      ball.style.animationDelay = `${index * 0.12 + 0.1}s`;
+
+      const span = document.createElement("span");
+      span.textContent = num;
+      ball.appendChild(span);
+
+      ballRow.appendChild(ball);
+
+      // trigger animation after paint
+      requestAnimationFrame(() => {
+        ball.classList.add("drop-in");
+      });
+    });
+
+    // Red mega ball
+    const redBall = document.createElement("div");
+    redBall.className = "ball red";
+    redBall.style.animationDelay = `${numbers.mains.length * 0.12 + 0.18}s`;
+
+    const span = document.createElement("span");
+    span.textContent = numbers.mega;
+    redBall.appendChild(span);
+
+    ballRow.appendChild(redBall);
+
+    requestAnimationFrame(() => {
+      redBall.classList.add("drop-in");
+    });
+  }
+
+  function setMotivation() {
+    const line =
+      motivationLines[Math.floor(Math.random() * motivationLines.length)];
+    motivationEl.textContent = line;
+  }
+
+  function setTimestamp() {
+    const now = new Date();
+    const options = {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit"
+    };
+    const formatted = now.toLocaleString(undefined, options);
+    timestampEl.textContent = `Manifested on ${formatted}`;
+  }
+
+  function reveal() {
+    preRevealEl.style.display = "none";
+    revealSection.style.display = "block";
+
+    lotteryLabel.textContent = `Your Luckyra Numbers for ${CONFIG.lotteryName}`;
+
+    const nums = generateNumbers();
+    renderBalls(nums);
+    setMotivation();
+    setTimestamp();
+
+    // store numbers for copy/share
+    revealSection.dataset.numbers = `${nums.mains.join(" ")} + ${nums.mega}`;
+  }
+
+  // Initial pre-reveal -> reveal transition
+  // You can tweak the timeout to be shorter/longer
+  setTimeout(reveal, 2200);
+
+  // CTA handlers (you’ll later wire these to real flows)
+  plusBtn.addEventListener("click", () => {
+    // In production: open paywall or premium modal
+    const nums = generateNumbers();
+    renderBalls(nums);
+    setMotivation();
+    setTimestamp();
+    revealSection.dataset.numbers = `${nums.mains.join(" ")} + ${nums.mega}`;
+  });
+
+  ticketBtn.addEventListener("click", () => {
+    // TODO: replace with your affiliate URL
+    const url = "https://www.megamillions.com/"; // placeholder
+    window.open(url, "_blank", "noopener");
+  });
+
+  shareBtn.addEventListener("click", async () => {
+    const numbers = revealSection.dataset.numbers || "";
+    const text = `My Luckyra numbers for ${CONFIG.lotteryName}: ${numbers}`;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        shareBtn.textContent = "Copied!";
+        setTimeout(() => (shareBtn.textContent = "Copy Numbers"), 1400);
+      } else {
+        alert(text);
+      }
+    } catch (e) {
+      alert(text);
+    }
+  });
+</script>
+
+</body>
+</html>
