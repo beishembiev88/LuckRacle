@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Luckyra – Numbers</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b0d26;
+      --bg-deep: #040816;
+      --gold-light: #f7be27;
+      --gold-dark: #d9981f;
+      --gold-deeper: #8a580f;
+      --red-ball: #d92827;
+      --white: #ffffff;
+      --text-muted: #c7cbd4;
+      --button-blue: #15306b;
+      --button-blue-hover: #1e3f8e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at top, #182258 0, var(--bg-deep) 55%, #000 100%);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 520px;
+      padding: 24px 20px 32px;
+    }
+
+    .card {
+      background: radial-gradient(circle at top, #141c4b 0, var(--bg) 55%, var(--bg-deep) 100%);
+      border-radius: 24px;
+      padding: 24px 20px 28px;
+      box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.7),
+        0 0 40px rgba(18, 53, 138, 0.7);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(247, 190, 39, 0.2) 0, transparent 40%),
+        radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.18) 0, transparent 55%),
+        radial-gradient(circle at 50% 80%, rgba(247, 190, 39, 0.1) 0, transparent 55%);
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .card-inner { position: relative; z-index: 1; }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .logo-ball {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 20%, #fff 0, #ffd976 20%, var(--gold-light) 45%, var(--gold-dark) 70%, var(--gold-deeper) 100%);
+      box-shadow: 0 0 18px rgba(247, 190, 39, 0.8);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: #13204b;
+      letter-spacing: 0.02em;
+    }
+
+    .logo-ball::after {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border-radius: inherit;
+      background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.95), transparent 55%);
+      opacity: 0.9;
+    }
+
+    .logo-ball span { position: relative; z-index: 1; }
+
+    .logo-text {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      text-shadow: 0 0 14px rgba(247, 190, 39, 0.9);
+    }
+
+    .subtitle {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 14px;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .step-circle {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.26);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .step.active .step-circle {
+      border-color: var(--gold-light);
+      box-shadow: 0 0 12px rgba(247, 190, 39, 1);
+      color: #13204b;
+      background: radial-gradient(circle at 30% 20%, #fff 0, #ffe89b 35%, var(--gold-light) 70%, var(--gold-dark) 100%);
+    }
+
+    .step.active .step-label { color: var(--white); }
+    .step-label { opacity: 0.7; }
+
+    .lottery-picker {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .lottery-picker label {
+      opacity: 0.9;
+      white-space: nowrap;
+    }
+
+    .lottery-picker select {
+      flex: 1;
+      background: rgba(10, 13, 38, 0.9);
+      border-radius: 999px;
+      border: 1px solid rgba(199, 203, 212, 0.6);
+      color: #f4f5ff;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      outline: none;
+    }
+
+    .label {
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    .sub-label {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .lotto-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 10px;
+      margin: 18px 0 12px;
+      min-height: 90px;
+    }
+
+    .ball {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #13204b;
+      position: relative;
+      transform: translateY(-120px);
+      opacity: 0;
+    }
+
+    .ball.gold {
+      background: radial-gradient(circle at 30% 20%, #fff 0, #ffe89b 15%, #ffd55b 35%, var(--gold-light) 55%, var(--gold-dark) 80%, var(--gold-deeper) 100%);
+      box-shadow:
+        0 0 18px rgba(247, 190, 39, 0.9),
+        0 8px 18px rgba(0, 0, 0, 0.7);
+    }
+
+    .ball.red {
+      background: radial-gradient(circle at 30% 20%, #fff 0, #ff9d9d 18%, #ff5050 40%, var(--red-ball) 70%, #7b1010 100%);
+      box-shadow:
+        0 0 18px rgba(255, 108, 108, 0.9),
+        0 8px 18px rgba(0, 0, 0, 0.7);
+    }
+
+    .ball::before {
+      content: "";
+      position: absolute;
+      inset: 5px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.9) 0, transparent 60%);
+      opacity: 0.9;
+    }
+
+    .ball span {
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 1px 1px rgba(255,255,255,0.7);
+    }
+
+    .ball.drop-in {
+      animation: dropIn 0.7s cubic-bezier(.21,1.01,.35,1) forwards;
+    }
+
+    @keyframes dropIn {
+      0% {
+        transform: translateY(-120px) scale(0.9);
+        opacity: 0;
+      }
+      70% {
+        transform: translateY(8px) scale(1.04);
+        opacity: 1;
+      }
+      90% {
+        transform: translateY(-4px) scale(0.98);
+      }
+      100% {
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .motivation {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--gold-light);
+      margin-bottom: 14px;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .btn {
+      border-radius: 999px;
+      padding: 11px 18px;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background-image: linear-gradient(135deg, var(--gold-light), var(--gold-dark));
+      color: #13204b;
+      box-shadow:
+        0 0 18px rgba(247, 190, 39, 0.9),
+        0 10px 22px rgba(0, 0, 0, 0.8);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        0 0 22px rgba(247, 190, 39, 1),
+        0 14px 26px rgba(0, 0, 0, 0.9);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, var(--button-blue), #284491);
+      color: #f4f5ff;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.7);
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-1px);
+      background: linear-gradient(135deg, var(--button-blue-hover), #3255b5);
+    }
+
+    .share-card {
+      border-radius: 16px;
+      border: 1px solid rgba(199, 203, 212, 0.35);
+      padding: 10px 12px;
+      background: radial-gradient(circle at top, rgba(247,190,39,0.12), rgba(11,13,38,0.9));
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .share-text {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .timestamp {
+      font-size: 0.7rem;
+      color: rgba(199, 203, 212, 0.8);
+      margin-top: 4px;
+    }
+
+    .share-btn {
+      font-size: 0.8rem;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(247, 190, 39, 0.7);
+      color: var(--gold-light);
+      background: transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+    }
+
+    .share-btn:hover {
+      background: rgba(247, 190, 39, 0.16);
+      transform: translateY(-1px);
+    }
+
+    .back-link {
+      margin-top: 10px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-align: center;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    @media (min-width: 520px) {
+      .lotto-row { gap: 12px; }
+      .ball { width: 62px; height: 62px; font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <div class="card">
+    <div class="card-inner">
+
+      <header class="logo-row">
+        <div class="logo-ball"><span>L</span></div>
+        <div class="logo-text">LUCKYRA</div>
+      </header>
+
+      <p class="subtitle">Step 3 – your numbers, blended from your details and tonight’s vibe.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-circle">1</div>
+          <div class="step-label">Basics</div>
+        </div>
+        <div class="step">
+          <div class="step-circle">2</div>
+          <div class="step-label">Vibe</div>
+        </div>
+        <div class="step active">
+          <div class="step-circle">3</div>
+          <div class="step-label">Numbers</div>
+        </div>
+      </div>
+
+      <div class="lottery-picker">
+        <label for="lotterySelect">Lottery</label>
+        <select id="lotterySelect">
+          <option value="megaMillions">Mega Millions (US)</option>
+          <option value="powerball">Powerball (US)</option>
+          <option value="euroMillions">EuroMillions (EU)</option>
+          <option value="ukLotto">UK National Lottery</option>
+          <option value="lottoMax">Lotto Max (CA)</option>
+          <option value="superEnalotto">SuperEnalotto (IT)</option>
+        </select>
+      </div>
+
+      <section id="revealSection">
+        <p id="lotteryTypeLabel" class="label">Your Luckyra numbers</p>
+        <p class="sub-label">Use them however feels right for tonight’s draw.</p>
+
+        <div id="ballRow" class="lotto-row"></div>
+
+        <p id="motivationText" class="motivation"></p>
+
+        <div class="cta-row">
+          <button id="plusButton" class="btn btn-primary">
+            Shake it again – Luckyra Plus
+          </button>
+          <button id="ticketButton" class="btn btn-secondary">
+            Buy my ticket now →
+          </button>
+        </div>
+
+        <div class="share-card">
+          <div>
+            <div class="share-text">Screenshot or copy this set and keep it with your ticket.</div>
+            <div id="timestamp" class="timestamp"></div>
+          </div>
+          <button id="shareButton" class="share-btn">Copy numbers</button>
+        </div>
+
+        <div class="back-link" id="backLink">Back to adjust details</div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // ----- ensure data exists -----
+  const basics = JSON.parse(localStorage.getItem("luckyraBasics") || "null");
+  const vibe   = JSON.parse(localStorage.getItem("luckyraVibe") || "null");
+  if (!basics || !vibe) {
+    window.location.href = "index.html";
+  }
+
+  // ----- lotteries -----
+  const LOTTERIES = {
+    megaMillions: {
+      id: "megaMillions",
+      displayName: "Mega Millions",
+      mainBalls: 5,
+      mainMin: 1,
+      mainMax: 70,
+      specialCount: 1,
+      specialMin: 1,
+      specialMax: 25,
+      specialLabel: "Mega Ball",
+      ticketUrl: "https://www.megamillions.com/"
+    },
+    powerball: {
+      id: "powerball",
+      displayName: "Powerball",
+      mainBalls: 5,
+      mainMin: 1,
+      mainMax: 69,
+      specialCount: 1,
+      specialMin: 1,
+      specialMax: 26,
+      specialLabel: "Powerball",
+      ticketUrl: "https://www.powerball.com/"
+    },
+    euroMillions: {
+      id: "euroMillions",
+      displayName: "EuroMillions",
+      mainBalls: 5,
+      mainMin: 1,
+      mainMax: 50,
+      specialCount: 2,
+      specialMin: 1,
+      specialMax: 12,
+      specialLabel: "Lucky Star",
+      ticketUrl: "https://www.national-lottery.com/euromillions"
+    },
+    ukLotto: {
+      id: "ukLotto",
+      displayName: "UK National Lottery",
+      mainBalls: 6,
+      mainMin: 1,
+      mainMax: 59,
+      specialCount: 0,
+      specialMin: 0,
+      specialMax: 0,
+      specialLabel: "",
+      ticketUrl: "https://www.national-lottery.com/lotto"
+    },
+    lottoMax: {
+      id: "lottoMax",
+      displayName: "Lotto Max",
+      mainBalls: 7,
+      mainMin: 1,
+      mainMax: 50,
+      specialCount: 0,
+      specialMin: 0,
+      specialMax: 0,
+      specialLabel: "",
+      ticketUrl: "https://www.olg.ca/en/lottery/play-lotto-max-online.html"
+    },
+    superEnalotto: {
+      id: "superEnalotto",
+      displayName: "SuperEnalotto",
+      mainBalls: 6,
+      mainMin: 1,
+      mainMax: 90,
+      specialCount: 0,
+      specialMin: 0,
+      specialMax: 0,
+      specialLabel: "",
+      ticketUrl: "https://www.superenalotto.com/"
+    }
+  };
+
+  const dropdown = document.getElementById("lotterySelect");
+  if (basics.lottery && LOTTERIES[basics.lottery]) {
+    dropdown.value = basics.lottery;
+  }
+  let currentLottery = LOTTERIES[dropdown.value];
+
+  // ----- DOM -----
+  const revealSection = document.getElementById("revealSection");
+  const ballRow       = document.getElementById("ballRow");
+  const motivationEl  = document.getElementById("motivationText");
+  const timestampEl   = document.getElementById("timestamp");
+  const lotteryLabel  = document.getElementById("lotteryTypeLabel");
+  const plusBtn       = document.getElementById("plusButton");
+  const ticketBtn     = document.getElementById("ticketButton");
+  const shareBtn      = document.getElementById("shareButton");
+  const backLink      = document.getElementById("backLink");
+
+  const motivationLines = [
+    "This pull is running hot tonight 🔥",
+    "Strong alignment between your chart and this draw.",
+    "Numbers feel loaded — keep this combo close.",
+    "High jackpot energy around this sequence.",
+    "If you play, play this one with intention."
+  ];
+
+  // ----- seeded RNG from basics + vibe -----
+  function makeSeededRng(seedStr) {
+    let h = 1779033703 ^ seedStr.length;
+    for (let i = 0; i < seedStr.length; i++) {
+      h = Math.imul(h ^ seedStr.charCodeAt(i), 3432918353);
+      h = (h << 13) | (h >>> 19);
+    }
+    return function () {
+      h = Math.imul(h ^ (h >>> 16), 2246822507);
+      h = Math.imul(h ^ (h >>> 13), 3266489909);
+      h ^= h >>> 16;
+      return (h >>> 0) / 4294967296;
+    };
+  }
+
+  const baseSeedString = JSON.stringify(basics) + "|" + JSON.stringify(vibe);
+  let seededRng = makeSeededRng(baseSeedString + "|" + currentLottery.id);
+
+  function randFloat() {
+    return seededRng();
+  }
+
+  function randomInt(min, max) {
+    return Math.floor(randFloat() * (max - min + 1)) + min;
+  }
+
+  function generateUniqueNumbers(count, min, max) {
+    const set = new Set();
+    while (set.size < count) {
+      set.add(randomInt(min, max));
+    }
+    return Array.from(set).sort((a, b) => a - b);
+  }
+
+  function generateNumbers() {
+    const cfg = currentLottery;
+
+    const mains = generateUniqueNumbers(
+      cfg.mainBalls,
+      cfg.mainMin,
+      cfg.mainMax
+    );
+
+    const specials = [];
+    for (let i = 0; i < cfg.specialCount; i++) {
+      specials.push(randomInt(cfg.specialMin, cfg.specialMax));
+    }
+
+    return { mains, specials };
+  }
+
+  function renderBalls(numbers) {
+    const cfg = currentLottery;
+    ballRow.innerHTML = "";
+
+    numbers.mains.forEach((num, index) => {
+      const ball = document.createElement("div");
+      ball.className = "ball gold";
+      ball.style.animationDelay = `${index * 0.12 + 0.1}s`;
+
+      const span = document.createElement("span");
+      span.textContent = num;
+      ball.appendChild(span);
+
+      ballRow.appendChild(ball);
+      requestAnimationFrame(() => ball.classList.add("drop-in"));
+    });
+
+    numbers.specials.forEach((num, index) => {
+      const red = document.createElement("div");
+      red.className = "ball red";
+      red.style.animationDelay = `${(cfg.mainBalls + index) * 0.12 + 0.18}s`;
+
+      const span = document.createElement("span");
+      span.textContent = num;
+      red.appendChild(span);
+
+      ballRow.appendChild(red);
+      requestAnimationFrame(() => red.classList.add("drop-in"));
+    });
+  }
+
+  function setMotivation() {
+    const line =
+      motivationLines[Math.floor(Math.random() * motivationLines.length)];
+    motivationEl.textContent = line;
+  }
+
+  function setTimestamp() {
+    const now = new Date();
+    const options = {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit"
+    };
+    timestampEl.textContent =
+      "Manifested on " + now.toLocaleString(undefined, options);
+  }
+
+  function setDatasetNumbers(nums) {
+    const cfg = currentLottery;
+    revealSection.dataset.numbers =
+      `${nums.mains.join(" ")}${
+        cfg.specialCount ? " + " + nums.specials.join(" ") : ""
+      }`;
+  }
+
+  function showNumbers() {
+    lotteryLabel.textContent =
+      `Your Luckyra numbers for ${currentLottery.displayName}`;
+
+    const nums = generateNumbers();
+    renderBalls(nums);
+    setMotivation();
+    setTimestamp();
+    setDatasetNumbers(nums);
+  }
+
+  // initial render (no auto-hide, stays on screen)
+  showNumbers();
+
+  // events
+  plusBtn.addEventListener("click", () => {
+    seededRng = makeSeededRng(baseSeedString + "|plus|" + Date.now() + "|" + currentLottery.id);
+    showNumbers();
+  });
+
+  dropdown.addEventListener("change", (e) => {
+    const id = e.target.value;
+    if (!LOTTERIES[id]) return;
+    currentLottery = LOTTERIES[id];
+
+    basics.lottery = id;
+    localStorage.setItem("luckyraBasics", JSON.stringify(basics));
+
+    seededRng = makeSeededRng(baseSeedString + "|" + id);
+    showNumbers();
+  });
+
+  ticketBtn.addEventListener("click", () => {
+    const url =
+      currentLottery.ticketUrl ||
+      "https://www.google.com/search?q=buy+lottery+ticket";
+    window.open(url, "_blank", "noopener");
+  });
+
+  shareBtn.addEventListener("click", async () => {
+    const nums = revealSection.dataset.numbers || "";
+    const text =
+      `My Luckyra numbers for ${currentLottery.displayName}: ${nums}`;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        shareBtn.textContent = "Copied!";
+        setTimeout(() => (shareBtn.textContent = "Copy numbers"), 1400);
+      } else {
+        alert(text);
+      }
+    } catch {
+      alert(text);
+    }
+  });
+
+  backLink.addEventListener("click", () => {
+    window.location.href = "index.html";
+  });
+</script>
+
+</body>
+</html>
