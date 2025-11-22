@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Luckyra – Your Mega Millions Ritual</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta
+    name="description"
+    content="Luckyra is your personal ritual for choosing Mega Millions numbers using birthday, zodiac, and vibe."
+  />
+  <link rel="icon" href="/favicon.ico" />
+  <style>
+    :root {
+      --bg: #050712;
+      --bg-soft: #0b101e;
+      --card: rgba(11, 16, 30, 0.96);
+      --card-soft: rgba(18, 24, 46, 0.9);
+      --primary: #ffb84d;      /* gold */
+      --primary-soft: rgba(255, 184, 77, 0.15);
+      --secondary: #3a7bfd;    /* electric blue */
+      --accent: #43ffaa;       /* mint */
+      --text: #f9fbff;
+      --muted: #8b95b8;
+      --border: rgba(255, 255, 255, 0.07);
+      --error: #ff5b6c;
+      --radius-lg: 20px;
+      --transition-fast: 180ms ease-out;
+      --shadow-card: 0 22px 80px rgba(0, 0, 0, 0.8);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter",
+        "SF Pro Text", sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at 10% 0%, #141834 0, transparent 50%),
+        radial-gradient(circle at 90% 10%, #271445 0, transparent 55%),
+        radial-gradient(circle at 50% 100%, #102021 0, transparent 55%),
+        var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+
+    /* subtle “smoke” overlay */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -20%;
+      background: radial-gradient(circle at 0% 20%, rgba(255, 255, 255, 0.06), transparent 55%),
+        radial-gradient(circle at 100% 80%, rgba(255, 255, 255, 0.04), transparent 55%);
+      mix-blend-mode: soft-light;
+      opacity: 0.5;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .shell {
+      max-width: 960px;
+      width: 100%;
+    }
+
+    .card {
+      background: linear-gradient(145deg, var(--card) 0, var(--card-soft) 100%);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border);
+      padding: 26px 24px 24px;
+      backdrop-filter: blur(18px);
+    }
+
+    @media (min-width: 768px) {
+      .card {
+        padding: 32px 32px 28px;
+      }
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 26px;
+    }
+
+    .brand-title {
+      font-size: 1.9rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .brand-subtitle {
+      margin-top: 6px;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    /* Step progress */
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      margin-bottom: 24px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .step-circle {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.74rem;
+      background: radial-gradient(circle at 30% 0%, rgba(255, 255, 255, 0.18), transparent 60%);
+      color: var(--muted);
+      transition: all var(--transition-fast);
+    }
+
+    .step.active .step-circle {
+      border-color: var(--primary);
+      background: radial-gradient(circle at 30% 0%, rgba(255, 184, 77, 0.55), transparent 60%);
+      color: #1b1305;
+      box-shadow: 0 0 18px rgba(255, 184, 77, 0.6);
+    }
+
+    .step.completed .step-circle {
+      border-color: var(--accent);
+      background: radial-gradient(circle at 30% 0%, rgba(67, 255, 170, 0.55), transparent 60%);
+      color: #02130d;
+      box-shadow: 0 0 16px rgba(67, 255, 170, 0.5);
+    }
+
+    .step-label {
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 0.7rem;
+    }
+
+    /* Forms */
+    .step-panel {
+      display: none;
+      animation: fadeInUp 220ms ease-out;
+    }
+
+    .step-panel.active {
+      display: block;
+    }
+
+    .panel-title {
+      font-size: 1.15rem;
+      margin-bottom: 4px;
+    }
+
+    .panel-subtitle {
+      color: var(--muted);
+      font-size: 0.87rem;
+      margin-bottom: 18px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    @media (min-width: 720px) {
+      .grid-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .field-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .field-input,
+    .field-select {
+      width: 100%;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      padding: 9px 13px;
+      background: radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.06), transparent 55%),
+        #050816;
+      color: var(--text);
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast),
+        background 150ms ease-out;
+    }
+
+    .field-input::placeholder {
+      color: #515b7a;
+    }
+
+    .field-input:focus,
+    .field-select:focus {
+      border-color: var(--secondary);
+      box-shadow: 0 0 0 1px rgba(58, 123, 253, 0.4);
+      background: #070b16;
+    }
+
+    .field-helper {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      font-size: 0.78rem;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .tag.active {
+      background: radial-gradient(circle at 30% 0%, rgba(255, 184, 77, 0.25), transparent 70%),
+        var(--primary-soft);
+      border-color: var(--primary);
+      color: #fefaf3;
+    }
+
+    .error {
+      margin-top: 6px;
+      font-size: 0.78rem;
+      color: var(--error);
+    }
+
+    /* Buttons */
+    .actions {
+      margin-top: 22px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .space-grow {
+      flex-grow: 1;
+    }
+
+    .btn {
+      border-radius: 999px;
+      font-size: 0.9rem;
+      border: none;
+      padding: 10px 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 90ms ease-out, box-shadow 120ms ease-out,
+        background 120ms ease-out, filter 120ms ease-out;
+    }
+
+    .btn-primary {
+      background: radial-gradient(circle at 30% 0, #ffe2a4 0, #ffb84d 40%, #f79a2f 100%);
+      color: #1c1203;
+      box-shadow: 0 0 18px rgba(255, 184, 77, 0.75);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+      box-shadow: 0 0 22px rgba(255, 184, 77, 0.9);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+      box-shadow: 0 0 12px rgba(255, 184, 77, 0.7);
+    }
+
+    .btn-secondary {
+      background: radial-gradient(circle at 30% 0, #b8d2ff 0, #3a7bfd 40%, #2952ff 100%);
+      color: #040815;
+      box-shadow: 0 0 14px rgba(58, 123, 253, 0.65);
+    }
+
+    .btn-secondary:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-ghost:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #d0d7ff;
+      transform: translateY(-1px);
+    }
+
+    .btn[disabled] {
+      opacity: 0.6;
+      cursor: default;
+      box-shadow: none;
+      transform: none;
+    }
+
+    /* Numbers result */
+    .numbers-wrap {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .numbers-main {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .ball {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.95rem;
+      background: radial-gradient(circle at 30% 0, #ffffff 0, #f3f5ff 35%, #cfd5ff 100%);
+      color: #10163a;
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      transform: translateY(6px) scale(0.9);
+      animation: revealBall 260ms ease-out forwards;
+    }
+
+    .ball:nth-child(2) { animation-delay: 60ms; }
+    .ball:nth-child(3) { animation-delay: 120ms; }
+    .ball:nth-child(4) { animation-delay: 180ms; }
+    .ball:nth-child(5) { animation-delay: 240ms; }
+
+    .ball-mega {
+      background: radial-gradient(circle at 30% 0, #ffe4b5 0, #ffb84d 30%, #f3832f 100%);
+      color: #1a1003;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
+    }
+
+    .numbers-caption {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .numbers-title {
+      font-size: 1.05rem;
+      font-weight: 500;
+    }
+
+    .tiny {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes revealBall {
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="card" aria-label="Luckyra Mega Millions ritual form">
+      <header class="brand">
+        <h1 class="brand-title">Luckyra</h1>
+        <p class="brand-subtitle">
+          A little ritual for picking your Mega Millions numbers using your birthday, zodiac, and vibe.
+        </p>
+      </header>
+
+      <div class="steps" aria-hidden="true">
+        <div class="step step-1 active">
+          <div class="step-circle">1</div>
+          <div class="step-label">Basics</div>
+        </div>
+        <div class="step step-2">
+          <div class="step-circle">2</div>
+          <div class="step-label">Vibe</div>
+        </div>
+        <div class="step step-3">
+          <div class="step-circle">3</div>
+          <div class="step-label">Numbers</div>
+        </div>
+      </div>
+
+      <!-- STEP 1: BASICS -->
+      <section class="step-panel step-1-panel active">
+        <h2 class="panel-title">First, tell us about you</h2>
+        <p class="panel-subtitle">
+          We’ll use this as the core “seed” for your numbers.
+        </p>
+
+        <div class="grid">
+          <div class="field">
+            <label class="field-label" for="name">Name (optional)</label>
+            <input class="field-input" id="name" name="name" type="text" placeholder="Alex" />
+            <p class="field-helper">Just for fun — it adds a bit of flavor.</p>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="dob">Date of birth *</label>
+            <input class="field-input" id="dob" name="dob" type="date" required />
+            <p class="field-helper">Required — this drives most of the numerology.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-2" style="margin-top: 14px;">
+          <div class="field">
+            <label class="field-label" for="tob">Time of birth (optional)</label>
+            <input class="field-input" id="tob" name="tob" type="time" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="location">Location / Timezone (optional)</label>
+            <input class="field-input" id="location" name="location" type="text" placeholder="New York, USA" />
+          </div>
+        </div>
+
+        <p id="error-step-1" class="error" style="display:none;"></p>
+
+        <div class="actions">
+          <span></span>
+          <button class="btn btn-primary" id="next-1">
+            Next
+          </button>
+        </div>
+      </section>
+
+      <!-- STEP 2: VIBE -->
+      <section class="step-panel step-2-panel" aria-label="Vibe selection">
+        <h2 class="panel-title">Now, set today’s vibe</h2>
+        <p class="panel-subtitle">
+          Numbers like to match your mood. Choose what feels closest.
+        </p>
+
+        <div class="grid">
+          <div class="field">
+            <label class="field-label">Overall mood</label>
+            <div class="tag-row" id="mood-tags">
+              <button class="tag" type="button" data-value="calm">Calm & grounded</button>
+              <button class="tag" type="button" data-value="focused">Focused & sharp</button>
+              <button class="tag" type="button" data-value="bold">Bold & risky</button>
+              <button class="tag" type="button" data-value="lucky">I just feel lucky</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Your zodiac (optional)</label>
+            <select class="field-select" id="zodiac">
+              <option value="">Select zodiac</option>
+              <option>Aries</option><option>Taurus</option><option>Gemini</option>
+              <option>Cancer</option><option>Leo</option><option>Virgo</option>
+              <option>Libra</option><option>Scorpio</option><option>Sagittarius</option>
+              <option>Capricorn</option><option>Aquarius</option><option>Pisces</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-2" style="margin-top: 14px;">
+          <div class="field">
+            <label class="field-label">Lucky frequency</label>
+            <div class="tag-row" id="freq-tags">
+              <button class="tag" type="button" data-value="steady">Steady wins</button>
+              <button class="tag" type="button" data-value="surge">Sudden breakthrough</button>
+              <button class="tag" type="button" data-value="chaotic">Chaos magic</button>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Anything to “avoid” today? (optional)</label>
+            <input class="field-input" id="avoid" type="text" placeholder="Example: repeat numbers, birthdays…" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-ghost" id="back-2">Back</button>
+          <button class="btn btn-primary" id="next-2">
+            Reveal my numbers
+          </button>
+        </div>
+      </section>
+
+      <!-- STEP 3: NUMBERS -->
+      <section class="step-panel step-3-panel" aria-label="Lucky numbers">
+        <h2 class="panel-title">Here’s your Luckyra pull</h2>
+        <p class="panel-subtitle">
+          Your numbers are calculated from your details and today’s vibe. Use them however feels right.
+        </p>
+
+        <div class="numbers-wrap">
+          <div>
+            <p class="numbers-title">Main numbers</p>
+            <p class="numbers-caption">Five numbers for the main Mega Millions draw.</p>
+            <div class="numbers-main" id="main-numbers"></div>
+          </div>
+
+          <div>
+            <p class="numbers-title">Mega Ball</p>
+            <p class="numbers-caption">One final “anchor” number for tonight.</p>
+            <div class="numbers-main" id="mega-number"></div>
+          </div>
+        </div>
+
+        <p class="tiny">
+          Numbers are generated deterministically from your inputs, so you can re-create this pull later
+          with the same details. This is for entertainment only — no guarantees, just vibes.
+        </p>
+
+        <div class="actions">
+          <button class="btn btn-secondary" id="again">Shake it again</button>
+          <button class="btn btn-ghost" id="back-3">Back to adjust details</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    // Simple deterministic PRNG based on xmur3 + sfc32
+    function xmur3(str) {
+      let h = 1779033703 ^ str.length;
+      for (let i = 0; i < str.length; i++) {
+        h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+        h = (h << 13) | (h >>> 19);
+      }
+      return function () {
+        h = Math.imul(h ^ (h >>> 16), 2246822507);
+        h = Math.imul(h ^ (h >>> 13), 3266489909);
+        h ^= h >>> 16;
+        return h >>> 0;
+      };
+    }
+
+    function sfc32(a, b, c, d) {
+      return function () {
+        a >>>= 0; b >>>= 0; c >>>= 0; d >>>= 0;
+        let t = (a + b) | 0;
+        a = b ^ (b >>> 9);
+        b = (c + (c << 3)) | 0;
+        c = (c << 21) | (c >>> 11);
+        d = (d + 1) | 0;
+        t = (t + d) | 0;
+        c = (c + t) | 0;
+        return (t >>> 0) / 4294967296;
+      };
+    }
+
+    function seedFromInputs(data) {
+      const seedString = JSON.stringify(data);
+      const seedGen = xmur3(seedString);
+      return sfc32(seedGen(), seedGen(), seedGen(), seedGen());
+    }
+
+    function generateUniqueNumbers(prng, count, min, max) {
+      const set = new Set();
+      const range = max - min + 1;
+      while (set.size < count) {
+        const n = Math.floor(prng() * range) + min;
+        set.add(n);
+      }
+      return Array.from(set).sort((a, b) => a - b);
+    }
+
+    // UI Logic
+    const stepPanels = {
+      1: document.querySelector(".step-1-panel"),
+      2: document.querySelector(".step-2-panel"),
+      3: document.querySelector(".step-3-panel"),
+    };
+    const stepIndicators = {
+      1: document.querySelector(".step.step-1"),
+      2: document.querySelector(".step.step-2"),
+      3: document.querySelector(".step.step-3"),
+    };
+
+    function setStep(step) {
+      [1, 2, 3].forEach((s) => {
+        stepPanels[s].classList.toggle("active", s === step);
+        stepIndicators[s].classList.toggle("active", s === step);
+        stepIndicators[s].classList.toggle("completed", s < step);
+      });
+    }
+
+    // Mood / freq tags
+    function bindTagGroup(id) {
+      const container = document.getElementById(id);
+      if (!container) return;
+      container.addEventListener("click", (e) => {
+        if (e.target.matches(".tag")) {
+          [...container.querySelectorAll(".tag")].forEach((t) =>
+            t.classList.toggle("active", t === e.target)
+          );
+        }
+      });
+    }
+
+    bindTagGroup("mood-tags");
+    bindTagGroup("freq-tags");
+
+    // Navigation buttons
+    document.getElementById("next-1").addEventListener("click", () => {
+      const dob = document.getElementById("dob").value;
+      const errorEl = document.getElementById("error-step-1");
+      if (!dob) {
+        errorEl.textContent = "Please enter your date of birth to continue.";
+        errorEl.style.display = "block";
+        return;
+      }
+      errorEl.style.display = "none";
+      setStep(2);
+    });
+
+    document.getElementById("back-2").addEventListener("click", () => setStep(1));
+    document.getElementById("back-3").addEventListener("click", () => setStep(2));
+
+    document.getElementById("next-2").addEventListener("click", () => {
+      generateAndRenderNumbers();
+      setStep(3);
+    });
+
+    document.getElementById("again").addEventListener("click", () => {
+      generateAndRenderNumbers(true);
+    });
+
+    function collectFormData(extraRandomize = false) {
+      const activeTagValue = (groupId) => {
+        const active = document
+          .getElementById(groupId)
+          .querySelector(".tag.active");
+        return active ? active.dataset.value : "";
+      };
+
+      const now = new Date();
+      return {
+        name: document.getElementById("name").value.trim(),
+        dob: document.getElementById("dob").value,
+        tob: document.getElementById("tob").value,
+        location: document.getElementById("location").value.trim(),
+        zodiac: document.getElementById("zodiac").value,
+        mood: activeTagValue("mood-tags"),
+        freq: activeTagValue("freq-tags"),
+        avoid: document.getElementById("avoid").value.trim(),
+        // extra bit so "again" can slightly shake the numbers
+        shake: extraRandomize ? now.getMilliseconds() : 0,
+        dayIndex: now.toISOString().slice(0, 10),
+      };
+    }
+
+    function generateAndRenderNumbers(extraRandomize = false) {
+      const data = collectFormData(extraRandomize);
+      const prng = seedFromInputs(data);
+
+      const mainNumbers = generateUniqueNumbers(prng, 5, 1, 70);
+      const megaNumber = generateUniqueNumbers(prng, 1, 1, 25)[0];
+
+      const mainContainer = document.getElementById("main-numbers");
+      const megaContainer = document.getElementById("mega-number");
+      mainContainer.innerHTML = "";
+      megaContainer.innerHTML = "";
+
+      mainNumbers.forEach((n) => {
+        const el = document.createElement("div");
+        el.className = "ball";
+        el.textContent = n;
+        mainContainer.appendChild(el);
+      });
+
+      const megaEl = document.createElement("div");
+      megaEl.className = "ball ball-mega";
+      megaEl.textContent = megaNumber;
+      megaContainer.appendChild(megaEl);
+    }
+  </script>
+</body>
+</html>
